@@ -1,6 +1,6 @@
-# Express Boilerplate!
+# Hydrate Server
 
-This is a boilerplate project used for starting new projects!
+Water your life!
 
 ## Set up
 
