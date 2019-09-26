@@ -20,8 +20,8 @@ hydrateRouter
             })
     })
     .post(jsonParser, (req, res, next) => {
-        const { username, password, phone, glasses, daystart, dayend } = req.body;
-        const newUser = { username, password, phone, glasses, daystart, dayend };
+        const { username, password, glasses } = req.body;
+        const newUser = { username, password, glasses };
         knexInstance
             .insert(newUser)
             .into('hydrate_users')
@@ -30,11 +30,20 @@ hydrateRouter
             })
             .catch(next)
     })
+    
 
 hydrateRouter
-    .route('/api/user/login')
-    .post((req,res) => {
-        
+    .route('/api/user/:id')
+    .get((req, res, next) => {
+        const {id} = req.params;
+        knexInstance
+            .from('hydrate_users')
+            .select('*')
+            .where('id', id)
+            .then(user => {
+                res.json(user)
+            })
+            .catch(next)
     })
 
-module.exports = hydrateRouter; 
+module.exports = hydrateRouter;
