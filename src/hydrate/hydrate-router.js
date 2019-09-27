@@ -30,7 +30,6 @@ hydrateRouter
             })
             .catch(next)
     })
-    
 
 hydrateRouter
     .route('/api/user/:id')
@@ -42,6 +41,27 @@ hydrateRouter
             .where('id', id)
             .then(user => {
                 res.json(user)
+            })
+            .catch(next)
+    })
+    .patch(jsonParser, (req, res, next) => {
+        const { glasses } = req.body
+        const glassesUpdate = { glasses }
+        const {id} = req.params
+
+        const numberOfValues = Object.values(glassesUpdate).filter(Boolean).length
+        if (numberOfValues === 0)
+        return res.status(400).json({
+        error: {
+        message: `Request body must contain either 'glasses'`
+        }
+      })
+
+        knexInstance('hydrate_users')
+            .where( {id} )
+            .update({glasses})
+            .then(user => {
+                res.status(204).end();
             })
             .catch(next)
     })
