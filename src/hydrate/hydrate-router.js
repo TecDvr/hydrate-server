@@ -1,8 +1,10 @@
 const express = require('express');
 const knex = require('knex');
 const { DB_URL } = require('../config');
+const { requireAuth } = require('../middleware/basic-auth')
 
 const jsonParser = express.json()
+const jsonBodyParser = express.json()
 const hydrateRouter = express.Router();
 const knexInstance = knex({
     client: 'pg',
@@ -33,6 +35,7 @@ hydrateRouter   // get all users... do i need this?
 
 hydrateRouter
     .route('/api/user/:id') // display current user profile
+    .all(requireAuth)
     .get((req, res, next) => {
         const {id} = req.params;
         knexInstance
@@ -44,7 +47,7 @@ hydrateRouter
             })
             .catch(next)
     })
-    .patch(jsonParser, (req, res, next) => {  // edit water consumption goal
+    .patch(requireAuth, jsonParser, (req, res, next) => {  // edit water consumption goal
         const { glasses } = req.body
         const glassesUpdate = { glasses }
         const { id } = req.params
@@ -65,9 +68,29 @@ hydrateRouter
     })
 
 hydrateRouter
-    .route('/api/user/login')  // user login 
-    .post((req, res, next) => {
+    .route('/api/user/login')  // user login, endpoint seems protected but shouldnt be
+    .post(jsonBodyParser, (req, res, next) => {
+        const { username, password } = req.body
+        const loginUser = { username, password }
 
+        for (const [key, value] of Object.entries(loginUser))
+            if (value == null)
+                return res.status(400).json({
+                    error: `Missing '${key}' in request body`
+                })
+        
+        knexInstance
+            .from('hydrate_users')
+            .where({ username, password })
+            .first()
+            .then(user => {
+                if (!user || !password) 
+                    return res.status(400).json({
+                        error: 'Incorrect username or password'
+                    })
+                res.send('ok')
+            })
+            .catch(next)
     })
 
 hydrateRouter
@@ -75,7 +98,7 @@ hydrateRouter
     .get((req, res, next) => {
         const {user_id} = req.params;
         knexInstance
-            .from('hydrate_quota')
+            .from('hydrate_quotas')
             .select('*')
             .where('user_id', user_id)
             .then(water => {
@@ -83,10 +106,10 @@ hydrateRouter
             })
             .catch(next)
     })
-    .patch(jsonParser, (req, res, next) => { // update water consumed
+    .patch(requireAuth, jsonParser, (req, res, next) => { // update water consumed
         const { amount } = req.body
         const amountUpdate = { amount }
-        const { id } = req.params
+        const { user_id } = req.params
 
         const numberOfValues = Object.values(amountUpdate).filter(Boolean).length
         if (numberOfValues === 0)
@@ -94,8 +117,10 @@ hydrateRouter
             error: { message: `Request body must contain 'amount'` }
             })
 
+        amountUpdate.user = req.user.id
+
         knexInstance('hydrate_quotas')
-            .where( {id} )
+            .where( {user_id} )
             .update( {amount} )
             .then(amount => {
                 res.status(204).end();
