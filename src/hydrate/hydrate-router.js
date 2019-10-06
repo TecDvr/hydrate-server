@@ -6,12 +6,13 @@ const { requireAuth } = require('../middleware/basic-auth')
 const jsonParser = express.json()
 const jsonBodyParser = express.json()
 const hydrateRouter = express.Router();
+
 const knexInstance = knex({
     client: 'pg',
     connection: DB_URL,
 });
 
-hydrateRouter   // get all users... do i need this?
+hydrateRouter   // get all users
     .route('/api/user')
     .get((req, res) => {
         knexInstance
@@ -29,6 +30,33 @@ hydrateRouter   // get all users... do i need this?
             .into('hydrate_users')
             .then(user => {
                 res.status(201).json(user);
+            })
+            .catch(next)
+    })
+
+hydrateRouter
+    .route('/api/user/login')  // user login
+    .post(jsonBodyParser, (req, res, next) => {
+        console.log('login route');
+        const { username, password } = req.body
+        const loginUser = { username, password }
+
+        for (const [key, value] of Object.entries(loginUser))
+            if (value == null)
+                return res.status(400).json({
+                    error: `Missing '${key}' in request body`
+                })
+        
+        knexInstance
+            .from('hydrate_users')
+            .where({ username, password })
+            .first()
+            .then(user => {
+                if (!user || !password) 
+                    return res.status(400).json({
+                        error: 'Incorrect username or password'
+                    })
+                res.send('ok')
             })
             .catch(next)
     })
@@ -67,31 +95,7 @@ hydrateRouter
             .catch(next)
     })
 
-hydrateRouter
-    .route('/api/user/login')  // user login, endpoint seems protected but shouldnt be
-    .post(jsonBodyParser, (req, res, next) => {
-        const { username, password } = req.body
-        const loginUser = { username, password }
 
-        for (const [key, value] of Object.entries(loginUser))
-            if (value == null)
-                return res.status(400).json({
-                    error: `Missing '${key}' in request body`
-                })
-        
-        knexInstance
-            .from('hydrate_users')
-            .where({ username, password })
-            .first()
-            .then(user => {
-                if (!user || !password) 
-                    return res.status(400).json({
-                        error: 'Incorrect username or password'
-                    })
-                res.send('ok')
-            })
-            .catch(next)
-    })
 
 hydrateRouter
     .route('/api/user/waterconsumed/:user_id')  // display water consumed/day
@@ -127,5 +131,18 @@ hydrateRouter
             })
             .catch(next)
     })
+
+hydrateRouter
+    .route('/api/fact')
+    .get((req, res) => {
+        knexInstance
+            .select('*')
+            .from('hydrate_facts')
+            .first()
+            .then(results => {
+                res.json(results)
+            })
+    })
+
 
 module.exports = hydrateRouter;

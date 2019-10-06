@@ -8,6 +8,7 @@ const knexInstance = knex({
 });
 
 function requireAuth(req, res, next) {
+    console.log('requiredAuth');
     const authToken = req.get('Authorization') || ''
 
     let basicToken
