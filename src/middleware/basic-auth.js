@@ -1,6 +1,6 @@
-//const bcrypt = require('bcryptjs')
 const knex = require('knex')
 const { DB_URL } = require('../config');
+const bcrypt = require('bcryptjs');
 
 const knexInstance = knex({
     client: 'pg',
@@ -30,23 +30,14 @@ function requireAuth(req, res, next) {
         .where({ username: tokenUserName })
         .first()
         .then(user => {
-            if (!user || user.password !== tokenPassword) {
+            console.log(tokenPassword);
+            if (!user || !bcrypt.compareSync(tokenPassword, user.password)) {
             //if (!user) { 
                 return res.status(401).json({ error: 'Unauthorized request' })
             }
 
             req.user = user
             next()
-
-            // return bcrypt.compare(tokenPassword, user.password)
-            //     .then(passwordsMatch => {
-            //         if (!passwordsMatch) {
-            //             return res.status(401).json({ error: 'Unauthorized request' })
-            //         }
-
-            //         req.user = user // add user object from db to request object
-            //         next()
-            //     })
 
         })
         .catch(next)

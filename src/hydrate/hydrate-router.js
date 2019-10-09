@@ -1,7 +1,8 @@
 const express = require('express');
 const knex = require('knex');
 const { DB_URL } = require('../config');
-const { requireAuth } = require('../middleware/basic-auth')
+const { requireAuth } = require('../middleware/basic-auth');
+const bcrypt = require('bcryptjs')
 
 const jsonParser = express.json()
 const jsonBodyParser = express.json()
@@ -23,15 +24,32 @@ hydrateRouter   // get all users
             })
     })
     .post(jsonParser, (req, res, next) => {  // register new users
-        const { username, password, glasses } = req.body;
+        const { username, glasses } = req.body;
+        const password = bcrypt.hashSync(req.body.password, 8);
         const newUser = { username, password, glasses };
+
+        const userColumns = [ 'id', 'username', 'glasses' ]
+        const quotaColumns = [ 'amount' ]
+
         knexInstance
-            .insert(newUser)
-            .into('hydrate_users')
-            .then(user => {
-                res.status(201).json(user);
+        .insert(newUser)
+        .into('hydrate_users')
+        .returning(userColumns)
+        .then(([ user ]) => knexInstance
+            .insert({
+            user_id: user.id,
+            date: 'now()',
+            amount: 0
             })
-            .catch(next)
+            .into('hydrate_quotas')
+            .returning(quotaColumns)
+            .then(([ quota ]) => res.status(201)
+            .json({
+                ...user,
+                ...quota
+            })
+            )
+        )
     })
 
 hydrateRouter
@@ -39,7 +57,7 @@ hydrateRouter
     .post(jsonBodyParser, (req, res, next) => {
         const { username, password } = req.body
         const loginUser = { username, password }
-        console.log(loginUser)
+        
         for (const [key, value] of Object.entries(loginUser))
             if (value == null)
                 return res.status(400).json({
@@ -48,15 +66,14 @@ hydrateRouter
         
         knexInstance
             .from('hydrate_users')
-            .where({ username, password })
+            .where({ username })
             .first()
             .then(user => {
-                console.log(user, 'test')
-                if (!user || !password) 
+                if (!user || !bcrypt.compareSync(password, user.password)) 
                     return res.status(400).json({
                         error: 'Incorrect username or password'
                     })
-                res.send('ok')
+                res.json(user)
             })
             .catch(next)
     })
