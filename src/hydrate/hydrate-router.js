@@ -99,12 +99,14 @@ hydrateRouter
 
 hydrateRouter
     .route('/api/user/waterconsumed/:user_id')  // display water consumed/day
+    .all(requireAuth)
     .get((req, res, next) => {
         const {user_id} = req.params;
         knexInstance
             .from('hydrate_quotas')
-            .select('*')
+            .select('amount')
             .where('user_id', user_id)
+            .first()
             .then(water => {
                 res.json(water)
             })
@@ -136,7 +138,7 @@ hydrateRouter
     .route('/api/fact')
     .get((req, res) => {
         knexInstance
-            .select('*')
+            .select('fact')
             .from('hydrate_facts')
             .first()
             .then(results => {

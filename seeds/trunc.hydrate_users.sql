@@ -1,0 +1,3 @@
+TRUNCATE
+  hydrate_users
+  RESTART IDENTITY CASCADE;
