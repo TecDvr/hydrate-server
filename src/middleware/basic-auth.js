@@ -1,4 +1,4 @@
-const bcrypt = require('bcryptjs')
+//const bcrypt = require('bcryptjs')
 const knex = require('knex')
 const { DB_URL } = require('../config');
 
@@ -8,7 +8,6 @@ const knexInstance = knex({
 });
 
 function requireAuth(req, res, next) {
-    console.log('requiredAuth');
     const authToken = req.get('Authorization') || ''
 
     let basicToken
@@ -31,20 +30,24 @@ function requireAuth(req, res, next) {
         .where({ username: tokenUserName })
         .first()
         .then(user => {
-            if (!user) { 
+            if (!user || user.password !== tokenPassword) {
+            //if (!user) { 
                 return res.status(401).json({ error: 'Unauthorized request' })
             }
 
-            return bcrypt.compare(tokenPassword, user.password)
-                .then(passwordsMatch => {
-                    if (!passwordsMatch) {
-                        console.log('testinggg')
-                        return res.status(401).json({ error: 'Unauthorized request' })
-                    }
+            req.user = user
+            next()
 
-                    req.user = user // add user object from db to request object
-                    next()
-                })
+            // return bcrypt.compare(tokenPassword, user.password)
+            //     .then(passwordsMatch => {
+            //         if (!passwordsMatch) {
+            //             return res.status(401).json({ error: 'Unauthorized request' })
+            //         }
+
+            //         req.user = user // add user object from db to request object
+            //         next()
+            //     })
+
         })
         .catch(next)
 }

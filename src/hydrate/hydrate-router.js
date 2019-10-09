@@ -37,10 +37,9 @@ hydrateRouter   // get all users
 hydrateRouter
     .route('/api/user/login')  // user login
     .post(jsonBodyParser, (req, res, next) => {
-        console.log('login route');
         const { username, password } = req.body
         const loginUser = { username, password }
-
+        console.log(loginUser)
         for (const [key, value] of Object.entries(loginUser))
             if (value == null)
                 return res.status(400).json({
@@ -52,6 +51,7 @@ hydrateRouter
             .where({ username, password })
             .first()
             .then(user => {
+                console.log(user, 'test')
                 if (!user || !password) 
                     return res.status(400).json({
                         error: 'Incorrect username or password'
