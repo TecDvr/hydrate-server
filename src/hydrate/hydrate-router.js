@@ -13,9 +13,9 @@ const knexInstance = knex({
     connection: DB_URL,
 });
 
-hydrateRouter   // get all users
+hydrateRouter   
     .route('/api/user')
-    .get((req, res) => {
+    .get((req, res) => { //get all users
         knexInstance
             .select('*')
             .from('hydrate_users')
@@ -23,40 +23,42 @@ hydrateRouter   // get all users
                 res.json(results)
             })
     })
-    .post(jsonParser, (req, res, next) => {  // register new users
+    .post(jsonParser, (req, res, next) => {  //register new users
         const { username, glasses } = req.body;
         const password = bcrypt.hashSync(req.body.password, 8);
         const newUser = { username, password, glasses };
-
         const userColumns = [ 'id', 'username', 'glasses' ]
         const quotaColumns = [ 'amount' ]
 
         knexInstance
-        .insert(newUser)
-        .into('hydrate_users')
-        .returning(userColumns)
-        .then(([ user ]) => knexInstance
-            .insert({
-            user_id: user.id,
-            date: 'now()',
-            amount: 0
-            })
-            .into('hydrate_quotas')
-            .returning(quotaColumns)
-            .then(([ quota ]) => res.status(201)
-            .json({
-                ...user,
-                ...quota
-            })
+            .insert(newUser)
+            .into('hydrate_users')
+            .returning(userColumns)
+            .then(([ user ]) => knexInstance
+                .insert({
+                user_id: user.id,
+                date: 'now()',
+                amount: 0
+                })
+                .into('hydrate_quotas')
+                .returning(quotaColumns)
+                .then(([ quota ]) => res.status(201)
+                .json({
+                    ...user,
+                    ...quota
+                })
+                )
             )
-        )
     })
 
 hydrateRouter
-    .route('/api/user/login')  // user login
-    .post(jsonBodyParser, (req, res, next) => {
+    .route('/api/user/login')  
+    .post(jsonBodyParser, (req, res, next) => { //user login
         const { username, password } = req.body
         const loginUser = { username, password }
+
+        const userColumns = [ 'id', 'username', 'glasses' ]
+        const quotaColumns = [ 'amount' ]
         
         for (const [key, value] of Object.entries(loginUser))
             if (value == null)
@@ -68,31 +70,58 @@ hydrateRouter
             .from('hydrate_users')
             .where({ username })
             .first()
+            .returning(userColumns)
             .then(user => {
                 if (!user || !bcrypt.compareSync(password, user.password)) 
-                    return res.status(400).json({
-                        error: 'Incorrect username or password'
+                return res.status(400).json({
+                    error: 'Incorrect username or password'
+                }) 
+                
+                knexInstance
+                    .from('hydrate_quotas')
+                    .where({
+                        user_id: user.id,
+                        date: 'now()'
                     })
-                res.json(user)
+                    .select('user_id')
+                    .then(rows => {
+                        if (rows.length > 0)
+                        return res.status(200).json(user)
+                        
+                        knexInstance
+                            .insert({
+                                user_id: user.id,
+                                date: 'now()',
+                                amount: 0
+                            })
+                            .into('hydrate_quotas')
+                            .returning(quotaColumns)
+                            .then(([ quota ]) => 
+                                res.status(201).json({
+                                    ...user,
+                                    ...quota
+                            }))
+                    }) 
             })
             .catch(next)
-    })
+        })
 
 hydrateRouter
-    .route('/api/user/:id') // display current user profile
+    .route('/api/user/:id') 
     .all(requireAuth)
-    .get((req, res, next) => {
+    .get((req, res, next) => { //display current user profile
         const {id} = req.params;
         knexInstance
             .from('hydrate_users')
             .select('*')
             .where('id', id)
+            .first()
             .then(user => {
                 res.json(user)
             })
             .catch(next)
     })
-    .patch(requireAuth, jsonParser, (req, res, next) => {  // edit water consumption goal
+    .patch(requireAuth, jsonParser, (req, res, next) => {  //edit water consumption goal
         const { glasses } = req.body
         const glassesUpdate = { glasses }
         const { id } = req.params
@@ -112,16 +141,14 @@ hydrateRouter
             .catch(next)
     })
 
-
-
 hydrateRouter
-    .route('/api/user/waterconsumed/:user_id')  // display water consumed/day
+    .route('/api/user/waterconsumed/:user_id')  
     .all(requireAuth)
-    .get((req, res, next) => {
+    .get((req, res, next) => { //display water consumed/day
         const {user_id} = req.params;
         knexInstance
             .from('hydrate_quotas')
-            .select('amount')
+            .select('amount', 'date')
             .where('user_id', user_id)
             .first()
             .then(water => {
@@ -129,7 +156,7 @@ hydrateRouter
             })
             .catch(next)
     })
-    .patch(requireAuth, jsonParser, (req, res, next) => { // update water consumed
+    .patch(requireAuth, jsonParser, (req, res, next) => { //update water consumed
         const { amount } = req.body
         const amountUpdate = { amount }
         const { user_id } = req.params
@@ -151,9 +178,29 @@ hydrateRouter
             .catch(next)
     })
 
+
+
+hydrateRouter
+    .route('/api/user/water/week/:user_id')  
+    .all(requireAuth)
+    .get((req, res, next) => { //display water consumed/day
+        const {user_id} = req.params;
+        knexInstance
+            .from('hydrate_quotas')
+            .select('amount', 'date')
+            .where('user_id', user_id)
+            .whereBetween('date', ['2019-10-9', 'now()'])
+            .then(water => {
+                res.json(water)
+            })
+            .catch(next)
+    })
+ 
+
+    
 hydrateRouter
     .route('/api/fact')
-    .get((req, res) => {
+    .get((req, res) => { //get all facts
         knexInstance
             .select('fact')
             .from('hydrate_facts')
@@ -162,6 +209,5 @@ hydrateRouter
                 res.json(results)
             })
     })
-
 
 module.exports = hydrateRouter;
