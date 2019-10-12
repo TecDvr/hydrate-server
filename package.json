@@ -12,7 +12,10 @@
     "migrate": "postgrator --config postgrator-config.js"
   },
   "keywords": [],
-  "author": "",
+  "engines": {
+    "node": "10.15.3"
+  },
+  "author": "zmoney",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",

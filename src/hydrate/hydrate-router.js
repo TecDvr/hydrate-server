@@ -197,7 +197,6 @@ hydrateRouter
             .whereBetween('date', [past, 'now()'])
             .orderBy('date','desc')
             .then(water => {
-                console.log("water~~~~",water);
                 res.json(water)
             })
             .catch(next)
