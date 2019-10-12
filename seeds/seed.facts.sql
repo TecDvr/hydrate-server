@@ -6,4 +6,3 @@ VALUES
 
     -- psql -U zachgw -d hydrate -f ./seeds/seed.facts.sql
     -- fix spelling error 'imgage'
-    -- reseed

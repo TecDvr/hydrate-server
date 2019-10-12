@@ -3,6 +3,7 @@ const knex = require('knex');
 const { DB_URL } = require('../config');
 const { requireAuth } = require('../middleware/basic-auth');
 const bcrypt = require('bcryptjs')
+const moment = require('moment');
 
 const jsonParser = express.json()
 const jsonBodyParser = express.json()
@@ -170,7 +171,10 @@ hydrateRouter
         amountUpdate.user = req.user.id
 
         knexInstance('hydrate_quotas')
-            .where( {user_id} )
+            .where({
+                user_id: user_id,
+                date: 'now()'
+            })
             .update( {amount} )
             .then(amount => {
                 res.status(204).end();
@@ -185,12 +189,15 @@ hydrateRouter
     .all(requireAuth)
     .get((req, res, next) => { //display water consumed/day
         const {user_id} = req.params;
+        const past = moment().subtract(7, 'days').format("YYYY-MM-DD");
         knexInstance
-            .from('hydrate_quotas')
+            .from('hydrate_quotas') 
             .select('amount', 'date')
             .where('user_id', user_id)
-            .whereBetween('date', ['2019-10-9', 'now()'])
+            .whereBetween('date', [past, 'now()'])
+            .orderBy('date','desc')
             .then(water => {
+                console.log("water~~~~",water);
                 res.json(water)
             })
             .catch(next)
