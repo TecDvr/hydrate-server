@@ -1,6 +1,6 @@
 module.exports = {
     PORT: process.env.PORT || 8000,
     NODE_ENV: process.env.NODE_ENV || 'development',
-    DB_URL: process.env.DB_URL || 'postgresql://zachgw@localhost/hydrate',
-    TEST_DB_URL: process.env.TEST_DB_URL || "postgresql://zachgw@localhost/hydrate-test"
+    DATABASE_URL: process.env.DATABASE_URL || 'postgresql://zachgw@localhost/hydrate',
+    TEST_DATABASE_URL: process.env.TEST_DATABASE_URL || "postgresql://zachgw@localhost/hydrate-test"
 };

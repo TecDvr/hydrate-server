@@ -1,6 +1,6 @@
 const express = require('express');
 const knex = require('knex');
-const { DB_URL } = require('../config');
+const { DATABASE_URL } = require('../config');
 const { requireAuth } = require('../middleware/basic-auth');
 const bcrypt = require('bcryptjs')
 const moment = require('moment');
@@ -11,7 +11,7 @@ const hydrateRouter = express.Router();
 
 const knexInstance = knex({
     client: 'pg',
-    connection: DB_URL,
+    connection: DATABASE_URL,
 });
 
 hydrateRouter   
