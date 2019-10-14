@@ -189,7 +189,7 @@ hydrateRouter
     .all(requireAuth)
     .get((req, res, next) => { //display water consumed/day
         const {user_id} = req.params;
-        const past = moment().subtract(7, 'days').format("YYYY-MM-DD");
+        const past = moment().subtract(5, 'days').format("YYYY-MM-DD");
         knexInstance
             .from('hydrate_quotas') 
             .select('amount', 'date')
@@ -201,19 +201,18 @@ hydrateRouter
             })
             .catch(next)
     })
- 
 
-    
-hydrateRouter
-    .route('/api/fact')
-    .get((req, res) => { //get all facts
-        knexInstance
-            .select('fact')
-            .from('hydrate_facts')
-            .first()
-            .then(results => {
-                res.json(results)
-            })
-    })
+// VERSION 2 UPDATE // 
+    hydrateRouter
+        .route('/api/fact')
+        .get((req, res) => { //get all facts
+            knexInstance
+                .select('fact')
+                .from('hydrate_facts')
+                .first()
+                .then(results => {
+                    res.json(results)
+                })
+        })
 
-module.exports = hydrateRouter;
+    module.exports = hydrateRouter;
