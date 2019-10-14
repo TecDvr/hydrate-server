@@ -2,8 +2,6 @@ const app = require('../src/app');
 const knex = require('knex')
 require('dotenv').config()
 
-// nest everthing under test server?
-
 //APP
   describe('App', () => {
     it('GET / responds with 200 containing "Welcome to Jurassic Park... Duh DAH duh na NUH"', () => {
@@ -11,9 +9,24 @@ require('dotenv').config()
     })
   })
 
-//USER
+//USER LOGIN 
   describe('User', () => {
     let db
+
+    const userPatch = {
+      glasses: 9
+    }
+
+    function makeAuthHeader(user) {
+      const token = Buffer.from(`${user.username}:${user.password}`).toString('base64')
+      return `Basic ${token}`
+    }
+
+    const user = {
+      "username": "test",
+        "password": "test",
+        "glasses": "8"
+    }
 
     let testData = [
       {
@@ -38,56 +51,44 @@ require('dotenv').config()
 
     after(() => db.destroy())
 
-    it('GET /api/user responds with 200', () => {
-      return supertest(app).get('/api/user').expect(200).expect('Content-Type', /json/)
-    });
-
-    it('POST /api/user responds with 201', () => {
-      const user = {
-        "username": "test",
-          "password": "test",
-          "glasses": "8"
-      }
-      return supertest(app).post('/api/user').send(user).expect(201)
+//USER
+    describe('USER', () => {
+      it('GET /api/user responds with 200', () => {
+        return supertest(app).get('/api/user').expect(200).expect('Content-Type', /json/)
+      });
+  
+      it('POST /api/user responds with 201', () => {
+        return supertest(app).post('/api/user').send(user).expect(201)
+      })
     })
-  })
 
 //LOGIN
-  describe('Login', () => {
-    it('POST /api/user/login responds with 201', () => {
-      const user = {
-        "username": "demoUser",
-        "password": "demoPassword"
-      }
-      return supertest(app).post('/api/user/login').send(user).expect(200 || 201)
+    describe('Login', () => {
+      it('POST /api/user/login responds with 201', () => {
+        return supertest(app).post('/api/user/login').send(user).expect(200 || 201)
+      })
     })
-  })
 
 //USER PROFILE
-  describe('User Profile', () => {
+    describe('User Profile', () => {
+      it('GET /api/user/:id responds with 200', () => {
+        return supertest(app).get('/api/user/49').set('Authorization', makeAuthHeader(user)).expect(200).expect('Content-Type', /json/)
+      })
 
-    const user = {
-      username: 'demoUser',
-      password: 'demoPassword'
-    }
-
-    const userPatch = {
-      glasses: 9
-    }
-
-    function makeAuthHeader(user) {
-      const token = Buffer.from(`${user.username}:${user.password}`).toString('base64')
-      return `Basic ${token}`
-    }
-
-    it('GET /api/user/:id responds with 200', () => {
-      return supertest(app).get('/api/user/49').set('Authorization', makeAuthHeader(user)).expect(200).expect('Content-Type', /json/)
+      it('PATCH /api/user/:id responds with 204', () => {
+        return supertest(app).patch('/api/user/49').set('Authorization', makeAuthHeader(user)).send(userPatch).expect(204)
+      })
     })
 
-    it('PATCH /api/user/:id responds with 204', () => {
-      return supertest(app).patch('/api/user/49').set('Authorization', makeAuthHeader(user)).send(userPatch).expect(204)
+//WATER WEEKS
+    describe('Water weeks', () => {
+      it('GET /api/user/water/week/:user_id responds with 200', () => {
+        return supertest(app).get('/api/user/water/week/49').set('Authorization', makeAuthHeader(user)).expect(200).expect('Content-Type', /json/)
+      })
     })
-  })
+})
+
+
 
 //WATER CONSUMED
   describe('Water consumed', () => {
@@ -111,22 +112,5 @@ require('dotenv').config()
 
     it('PATCH /api/user/waterconsumed/:user_id responds with 204', () => {
       return supertest(app).patch('/api/user/waterconsumed/49').set('Authorization', makeAuthHeader(user)).send(userPatch).expect(204)
-    })
-  })
-
-//WATER WEEKS
-  describe('Water weeks', () => {
-    const user = {
-      username: 'demoUser',
-      password: 'demoPassword'
-    }
-
-    function makeAuthHeader(user) {
-      const token = Buffer.from(`${user.username}:${user.password}`).toString('base64')
-      return `Basic ${token}`
-    }
-
-    it('GET /api/user/water/week/:user_id responds with 200', () => {
-      return supertest(app).get('/api/user/water/week/49').set('Authorization', makeAuthHeader(user)).expect(200).expect('Content-Type', /json/)
     })
   })

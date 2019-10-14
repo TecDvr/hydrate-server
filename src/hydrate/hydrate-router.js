@@ -189,7 +189,7 @@ hydrateRouter
     .all(requireAuth)
     .get((req, res, next) => { //display water consumed/day
         const {user_id} = req.params;
-        const past = moment().subtract(5, 'days').format("YYYY-MM-DD");
+        const past = moment().subtract(4, 'days').format("YYYY-MM-DD");
         knexInstance
             .from('hydrate_quotas') 
             .select('amount', 'date')
