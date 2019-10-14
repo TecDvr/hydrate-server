@@ -1,6 +1,7 @@
 const app = require('../src/app');
 const knex = require('knex')
 
+
 //APP
   describe('App', () => {
     it('GET / responds with 200 containing "Welcome to Jurassic Park... Duh DAH duh na NUH"', () => {
@@ -43,18 +44,19 @@ const knex = require('knex')
       app.set('db', db)
     })
 
+    console.log(process.env.TEST_DB_URL, 'testing');
+
     before(() => {
         return db
           .into('hydrate_users')
           .insert(testData)
     })
 
-    // before(() => db('hydrate_users').truncate())
-
     after(() => db.destroy())
 
 //USER
     describe('USER', () => {
+      
       it('GET /api/user responds with 200', () => {
         return supertest(app).get('/api/user').expect(200).expect('Content-Type', /json/)
       });
