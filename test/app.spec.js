@@ -1,6 +1,5 @@
 const app = require('../src/app');
 const knex = require('knex')
-require('dotenv').config()
 
 //APP
   describe('App', () => {
@@ -41,6 +40,7 @@ require('dotenv').config()
         client: 'pg',
         connection: process.env.TEST_DB_URL,
       })
+      app.set('db', db)
     })
 
     before(() => {
@@ -48,6 +48,8 @@ require('dotenv').config()
           .into('hydrate_users')
           .insert(testData)
     })
+
+    // before(() => db('hydrate_users').truncate())
 
     after(() => db.destroy())
 
@@ -86,31 +88,24 @@ require('dotenv').config()
         return supertest(app).get('/api/user/water/week/49').set('Authorization', makeAuthHeader(user)).expect(200).expect('Content-Type', /json/)
       })
     })
+
+//WATER CONSUMED
+    describe('Water consumed', () => {
+
+      const userPatch = {
+        amount: 9
+      }
+
+      it('GET /api/user/waterconsumed/:user_id responds with 200', () => {
+        return supertest(app).get('/api/user/waterconsumed/49').set('Authorization', makeAuthHeader(user)).expect(200).expect('Content-Type', /json/)
+      })
+
+      it('PATCH /api/user/waterconsumed/:user_id responds with 204', () => {
+        return supertest(app).patch('/api/user/waterconsumed/49').set('Authorization', makeAuthHeader(user)).send(userPatch).expect(204)
+      })
+    })
 })
 
 
 
-//WATER CONSUMED
-  describe('Water consumed', () => {
-    const user = {
-      username: 'demoUser',
-      password: 'demoPassword'
-    }
 
-    const userPatch = {
-      amount: 9
-    }
-
-    function makeAuthHeader(user) {
-      const token = Buffer.from(`${user.username}:${user.password}`).toString('base64')
-      return `Basic ${token}`
-    }
-
-    it('GET /api/user/waterconsumed/:user_id responds with 200', () => {
-      return supertest(app).get('/api/user/waterconsumed/49').set('Authorization', makeAuthHeader(user)).expect(200).expect('Content-Type', /json/)
-    })
-
-    it('PATCH /api/user/waterconsumed/:user_id responds with 204', () => {
-      return supertest(app).patch('/api/user/waterconsumed/49').set('Authorization', makeAuthHeader(user)).send(userPatch).expect(204)
-    })
-  })
