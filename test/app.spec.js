@@ -39,12 +39,10 @@ const knex = require('knex')
     before(() => {
       db = knex({
         client: 'pg',
-        connection: process.env.TEST_DB_URL,
+        connection: process.env.TEST_DATABASE_URL,
       })
       app.set('db', db)
     })
-
-    console.log(process.env.TEST_DB_URL, 'testing');
 
     before(() => {
         return db
