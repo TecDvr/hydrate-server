@@ -1,6 +1,6 @@
 # Hydrate - Server
 
-See this app live at: https://hydrate.now.sh/ui
+See this app live at: https://hydrate.now.sh/
 
 ## API Endpoints 
 
