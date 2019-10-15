@@ -182,12 +182,10 @@ hydrateRouter
             .catch(next)
     })
 
-
-
 hydrateRouter
     .route('/api/user/water/week/:user_id')  
     .all(requireAuth)
-    .get((req, res, next) => { //display water consumed/day
+    .get((req, res, next) => { //display water consumed/week
         const {user_id} = req.params;
         const past = moment().subtract(4, 'days').format("YYYY-MM-DD");
         knexInstance

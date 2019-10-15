@@ -30,9 +30,8 @@ function requireAuth(req, res, next) {
         .where({ username: tokenUserName })
         .first()
         .then(user => {
-            console.log(tokenPassword);
+
             if (!user || !bcrypt.compareSync(tokenPassword, user.password)) {
-            //if (!user) { 
                 return res.status(401).json({ error: 'Unauthorized request' })
             }
 
