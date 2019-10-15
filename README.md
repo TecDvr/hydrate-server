@@ -2,6 +2,21 @@
 
 See this app live at: https://hydrate.now.sh/ui
 
+## API Endpoints 
+
+* GET /api/user - get all users in system 
+* POST /api/user - register new users
+
+* POST /api/user/login - user login 
+
+* GET /api/user/:id - get specific user profile
+* POST /api/user/:id - edit water consumption goal 
+
+* GET /api/user/waterconsumed/:user_id - get water consumed
+* PATCH /api/user/waterconsumed/:user_id - update water consumed
+
+* GET /api/user/water/week/:user_id - get water consumed for the week
+
 ## Background
 
 Water is the source of all life. Unfortunetly our daily lives have a habit of distracting us from drinking enough water, which can lead to dehydration. Dehydration may lead to dry skin, wrinkles, poor kidney fucntionality, decrease in physical preformance, and a decrease in cognitive preformance amoung many other adverse effects. 
@@ -10,16 +25,10 @@ Hydrate will help you keep track of your water consumption goal and daily intake
 
 ### Technologies Used
 
-#### Front-End
-* React.js
-* JavaScript
-* HTML5
-* CSS3
-
 #### Back-End
 * Node.js
 * Express.js
-* Bcryptjs
+* PostgreSQL
 
 ## Description 
 
