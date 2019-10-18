@@ -30,8 +30,9 @@ hydrateRouter
         const newUser = { username, password, glasses };
         const userColumns = [ 'id', 'username', 'glasses' ]
         const quotaColumns = [ 'amount' ]
+    
         
-        if (glasses === '0' || glasses > '10') {
+        if (parseInt(glasses) <= 0 || parseInt(glasses) > 10) {
             return res.status(400).json({error: 'Needs to be between 1-10'})
         }
 
