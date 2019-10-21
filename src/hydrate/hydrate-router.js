@@ -14,6 +14,8 @@ const knexInstance = knex({
     connection: DATABASE_URL,
 });
 
+
+
 hydrateRouter   
     .route('/api/user')
     .get((req, res) => { //get all users
@@ -30,7 +32,6 @@ hydrateRouter
         const newUser = { username, password, glasses };
         const userColumns = [ 'id', 'username', 'glasses' ]
         const quotaColumns = [ 'amount' ]
-    
         
         if (parseInt(glasses) <= 0 || parseInt(glasses) > 10) {
             return res.status(400).json({error: 'Needs to be between 1-10'})
