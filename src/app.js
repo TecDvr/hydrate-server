@@ -16,7 +16,7 @@ app.use(helmet());
 app.use(cors());
 app.use(hydrateRouter);
 
-const client = new twillo('twilio')('ACd183471dd28ac6cc49d602bf674dc6d8', '450a401f2a3c4016e9a073e526eccc5e');
+const client = new twillo('twilio')('ACd183471dd28ac6cc49d602bf674dc6d8', '');
 
 app.get('/', (req, res) => {
     res.send('Welcome to Jurassic Park... Duh DAH duh na NUH');
