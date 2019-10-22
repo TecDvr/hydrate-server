@@ -20,12 +20,13 @@ const knexInstance = knex({
     connection: DATABASE_URL,
 });
 
-cron.schedule('*/5 * * * * *', () => {
+cron.schedule('* * 09 * * *', () => {
     console.log('working');
 
     knexInstance
             .select('phone', 'glasses')
             .from('hydrate_users')
+            .where('text_me', true)
             .then(numbers => {
                 numbers.map(userNumber => (
                 fetch(`http://localhost:8000/api/sms?recipient=${userNumber.phone}&sms=Good morning! This is just a friendly reminder to drink ${userNumber.glasses} glasses of water today! Water your life!`)
@@ -177,6 +178,22 @@ hydrateRouter
             })
             .catch(next)
     })
+
+hydrateRouter
+    .route('/api/textme/:id')
+    .patch(jsonParser, (req, res, next) => {
+        const { text_me } = req.body
+        const { id } = req.params
+
+        knexInstance('hydrate_users')
+            .where( {id} )
+            .update({text_me})
+            .then(user => {
+                res.status(204).end();
+            })
+            .catch(next)
+    })
+    
 
 hydrateRouter
     .route('/api/user/waterconsumed/:user_id')  
