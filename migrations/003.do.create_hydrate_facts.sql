@@ -3,3 +3,5 @@ CREATE TABLE hydrate_facts (
     fact TEXT NOT NULL,
     imgage TEXT NOT NULL
 );
+
+-- fix spelling error 'imgage'

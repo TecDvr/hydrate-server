@@ -17,6 +17,10 @@ const knex = require('knex')
       glasses: 9
     }
 
+    const userPatchText = {
+      text_me: false
+    }
+
     function makeAuthHeader(user) {
       const token = Buffer.from(`${user.username}:${user.password}`).toString('base64')
       return `Basic ${token}`
@@ -25,14 +29,18 @@ const knex = require('knex')
     const user = {
       "username": "test",
         "password": "test",
-        "glasses": "8"
+        "glasses": "8",
+        "phone": "9259222554",
+        "text_me": "false"
     }
 
     let testData = [
       {
         username: 'testName',
         password: 'testPassword',
-        glasses: 10
+        glasses: 10,
+        phone: 9259222554,
+        text_me: false
       }
     ]
 
@@ -89,6 +97,13 @@ const knex = require('knex')
       })
     })
 
+//TEXT ME
+    describe('Text me', () => {
+      it('PATCH /api/textme/:id resoinds with 204', () => {
+        return supertest(app).patch('/api/textme/49').send(userPatchText).expect(204)
+      })
+    })
+
 //WATER CONSUMED
     describe('Water consumed', () => {
 
@@ -105,7 +120,6 @@ const knex = require('knex')
       })
     })
 })
-
 
 
 

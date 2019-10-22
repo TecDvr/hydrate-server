@@ -5,7 +5,7 @@ const { requireAuth } = require('../middleware/basic-auth');
 const bcrypt = require('bcryptjs')
 const moment = require('moment');
 const twilio = require('twilio')
-const accountSid = 'ACd183471dd28ac6cc49d602bf674dc6d8';
+const accountSid = '5432';
 const authToken = TWILIO_KEY;
 const client = require('twilio')(accountSid, authToken);
 const cron = require('node-cron');
@@ -20,9 +20,8 @@ const knexInstance = knex({
     connection: DATABASE_URL,
 });
 
-cron.schedule('* * 09 * * *', () => {
-    console.log('working');
-
+//schedule text message to users
+cron.schedule('* * * 1 *', () => {
     knexInstance
             .select('phone', 'glasses')
             .from('hydrate_users')
@@ -37,6 +36,7 @@ cron.schedule('* * 09 * * *', () => {
     timezone: 'America/Los_Angeles'
 });
 
+//sms text route
 hydrateRouter
     .route('/api/sms')
     .get((req, res, next) => {
@@ -44,7 +44,7 @@ hydrateRouter
 
         client.messages.create({
             body: sms,
-            from: '+16072694473',
+            from: '+18312085037',
             to: '+1' + recipient
         })
         .then(message => console.log(message.body))
