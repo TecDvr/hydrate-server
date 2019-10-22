@@ -1,9 +1,15 @@
 const express = require('express');
 const knex = require('knex');
-const { DATABASE_URL } = require('../config');
+const { DATABASE_URL, TWILIO_KEY } = require('../config');
 const { requireAuth } = require('../middleware/basic-auth');
 const bcrypt = require('bcryptjs')
 const moment = require('moment');
+const twilio = require('twilio')
+const accountSid = 'ACd183471dd28ac6cc49d602bf674dc6d8';
+const authToken = TWILIO_KEY;
+const client = require('twilio')(accountSid, authToken);
+const cron = require('node-cron');
+const fetch = require('node-fetch');
 
 const jsonParser = express.json()
 const jsonBodyParser = express.json()
@@ -13,6 +19,36 @@ const knexInstance = knex({
     client: 'pg',
     connection: DATABASE_URL,
 });
+
+cron.schedule('*/5 * * * * *', () => {
+    console.log('working');
+
+    knexInstance
+            .select('phone', 'glasses')
+            .from('hydrate_users')
+            .then(numbers => {
+                numbers.map(userNumber => (
+                fetch(`http://localhost:8000/api/sms?recipient=${userNumber.phone}&sms=Good morning! This is just a friendly reminder to drink ${userNumber.glasses} glasses of water today! Water your life!`)
+               ))
+            })
+}, {
+    scheduled: true,
+    timezone: 'America/Los_Angeles'
+});
+
+hydrateRouter
+    .route('/api/sms')
+    .get((req, res, next) => {
+        const { recipient, sms } = req.query
+
+        client.messages.create({
+            body: sms,
+            from: '+16072694473',
+            to: '+1' + recipient
+        })
+        .then(message => console.log(message.body))
+        .catch(next)
+    })
 
 hydrateRouter   
     .route('/api/user')
@@ -25,10 +61,10 @@ hydrateRouter
             })
     })
     .post(jsonParser, (req, res, next) => {  //register new users
-        const { username, glasses } = req.body;
+        const { username, phone, glasses } = req.body;
         const password = bcrypt.hashSync(req.body.password, 8);
-        const newUser = { username, password, glasses };
-        const userColumns = [ 'id', 'username', 'glasses' ]
+        const newUser = { username, password, phone, glasses };
+        const userColumns = [ 'id', 'username', 'phone', 'glasses' ]
         const quotaColumns = [ 'amount' ]
 
         knexInstance

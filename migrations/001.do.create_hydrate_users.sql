@@ -14,5 +14,3 @@ CREATE TABLE hydrate_quotas (
     date DATE NOT NULL,
     amount INTEGER NOT NULL
 );
-
--- npm run migrate -- 1 
