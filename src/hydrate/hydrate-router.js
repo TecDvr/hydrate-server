@@ -20,8 +20,6 @@ const knexInstance = knex({
     connection: DATABASE_URL,
 });
 
-//http://localhost:8000/api
-//https://powerful-scrubland-63666.herokuapp.com/api
 //schedule text message to users
 cron.schedule('* * * * 1', () => {
     knexInstance
@@ -30,7 +28,7 @@ cron.schedule('* * * * 1', () => {
             .where('text_me', true)
             .then(numbers => {
                 numbers.map(userNumber => (
-                fetch(`http://localhost:8000/api/sms?recipient=${userNumber.phone}&sms=Good morning! This is just a friendly reminder to drink ${userNumber.glasses} glasses of water today! Water your life!`)
+                fetch(`https://powerful-scrubland-63666.herokuapp.com/api/sms?recipient=${userNumber.phone}&sms=Good morning! This is just a friendly reminder to drink ${userNumber.glasses} glasses of water today! Water your life!`)
                ))
             })
 }, {
