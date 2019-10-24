@@ -7,6 +7,10 @@ See this app live at: https://hydrate.now.sh/
 * GET /api/user - get all users in system 
 * POST /api/user - register new users
 
+* PATCH /api/textme/:id - opt in/out of text messages
+
+* GET /api/sms - sendd text message
+
 * POST /api/user/login - user login 
 
 * GET /api/user/:id - get specific user profile

@@ -1,11 +1,11 @@
 const express = require('express');
 const knex = require('knex');
-const { DATABASE_URL, TWILIO_KEY } = require('../config');
+const { DATABASE_URL, TWILIO_KEY, TWILIO_SID } = require('../config');
 const { requireAuth } = require('../middleware/basic-auth');
 const bcrypt = require('bcryptjs')
 const moment = require('moment');
 const twilio = require('twilio')
-const accountSid = '5432';
+const accountSid = TWILIO_SID;
 const authToken = TWILIO_KEY;
 const client = require('twilio')(accountSid, authToken);
 const cron = require('node-cron');
@@ -20,8 +20,10 @@ const knexInstance = knex({
     connection: DATABASE_URL,
 });
 
+//http://localhost:8000/api
+//https://powerful-scrubland-63666.herokuapp.com/api
 //schedule text message to users
-cron.schedule('* * * 1 *', () => {
+cron.schedule('* * * * 1', () => {
     knexInstance
             .select('phone', 'glasses')
             .from('hydrate_users')
@@ -47,7 +49,9 @@ hydrateRouter
             from: '+18312085037',
             to: '+1' + recipient
         })
-        .then(message => console.log(message.body))
+        .then(response => {
+            res.status(200).json(response)
+        })
         .catch(next)
     })
 
@@ -203,7 +207,10 @@ hydrateRouter
         knexInstance
             .from('hydrate_quotas')
             .select('amount', 'date')
-            .where('user_id', user_id)
+            .where({
+                user_id: user_id,
+                date: 'now()'
+            })
             .first()
             .then(water => {
                 res.json(water)

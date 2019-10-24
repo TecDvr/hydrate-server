@@ -90,6 +90,13 @@ const knex = require('knex')
       })
     })
 
+//SMS
+    describe('SMS', function() {
+      it('GET /api/sms responds with 200', () => {
+        return supertest(app).get('/api/sms?recipient=4156903329&sms=testing').expect(200).expect('Content-Type', /json/)
+      });
+    })
+
 //WATER WEEKS
     describe('Water weeks', () => {
       it('GET /api/user/water/week/:user_id responds with 200', () => {
