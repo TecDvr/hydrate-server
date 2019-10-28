@@ -80,3 +80,4 @@ Hydrate users are able to set their initial water consumption goal wh
 * Transition animations
 
 ### ENJOY!
+
